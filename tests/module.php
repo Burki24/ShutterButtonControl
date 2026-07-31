@@ -164,8 +164,7 @@ class IPSModuleStrict
         string $name,
         array $presentation,
         int $position = 0
-    ): bool
-    {
+    ): bool {
         return $this->RegisterTestVariable($ident, $name, VARIABLETYPE_INTEGER, $presentation, $position);
     }
 
@@ -175,8 +174,7 @@ class IPSModuleStrict
         string $name,
         array $presentation,
         int $position = 0
-    ): bool
-    {
+    ): bool {
         return $this->RegisterTestVariable($ident, $name, VARIABLETYPE_STRING, $presentation, $position);
     }
 
@@ -208,8 +206,7 @@ class IPSModuleStrict
         int $type,
         array $presentation,
         int $position
-    ): bool
-    {
+    ): bool {
         $created = !isset($GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident]);
         $objectID = $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident] ?? 10000 + count($this->registeredVariables);
         $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident] = $objectID;
