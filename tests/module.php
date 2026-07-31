@@ -51,26 +51,6 @@ function RequestAction(int $variableID, mixed $value): void
     $GLOBALS['SBC_REQUEST_ACTIONS'][] = ['id' => $variableID, 'value' => $value];
 }
 
-function IPS_GetObjectIDByIdent(string $ident, int $parentID): int|false
-{
-    return $GLOBALS['SBC_IDENT_MAP'][$parentID][$ident] ?? false;
-}
-
-function IPS_SetIdent(int $objectID, string $ident): void
-{
-    foreach ($GLOBALS['SBC_IDENT_MAP'] as $parentID => $idents) {
-        foreach ($idents as $oldIdent => $mappedID) {
-            if ($mappedID !== $objectID) {
-                continue;
-            }
-
-            unset($GLOBALS['SBC_IDENT_MAP'][$parentID][$oldIdent]);
-            $GLOBALS['SBC_IDENT_MAP'][$parentID][$ident] = $objectID;
-            return;
-        }
-    }
-}
-
 class IPSModuleStrict
 {
     public int $InstanceID = 4242;
@@ -84,7 +64,7 @@ class IPSModuleStrict
     /** @var array<int, array<int, bool>> */
     public array $messages = [];
     /** @var array<string, array<string, mixed>> */
-    public array $maintainedVariables = [];
+    public array $registeredVariables = [];
     /** @var list<array{message: string, data: string}> */
     public array $debug = [];
     public int $status = 0;
@@ -178,26 +158,50 @@ class IPSModuleStrict
         unset($this->messages[$senderID][$message]);
     }
 
-    /** @param array<string, mixed>|string $presentation */
-    public function MaintainVariable(
+    /** @param array<string, mixed> $presentation */
+    public function RegisterVariableInteger(
+        string $ident,
+        string $name,
+        array $presentation,
+        int $position = 0
+    ): bool
+    {
+        return $this->RegisterTestVariable($ident, $name, VARIABLETYPE_INTEGER, $presentation, $position);
+    }
+
+    /** @param array<string, mixed> $presentation */
+    public function RegisterVariableString(
+        string $ident,
+        string $name,
+        array $presentation,
+        int $position = 0
+    ): bool
+    {
+        return $this->RegisterTestVariable($ident, $name, VARIABLETYPE_STRING, $presentation, $position);
+    }
+
+    /** @param array<string, mixed> $presentation */
+    private function RegisterTestVariable(
         string $ident,
         string $name,
         int $type,
-        array|string $presentation,
-        int $position,
-        bool $keep
-    ): void {
-        $objectID = $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident] ?? 10000 + count($this->maintainedVariables);
+        array $presentation,
+        int $position
+    ): bool
+    {
+        $created = !isset($GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident]);
+        $objectID = $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident] ?? 10000 + count($this->registeredVariables);
         $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident] = $objectID;
         $GLOBALS['SBC_VARIABLES'][$objectID] ??= ['type' => $type, 'value' => $type === VARIABLETYPE_STRING ? '' : 0];
-        $this->maintainedVariables[$ident] = [
+        $this->registeredVariables[$ident] = [
             'name'         => $name,
             'type'         => $type,
             'presentation' => $presentation,
             'position'     => $position,
-            'keep'         => $keep,
             'id'           => $objectID
         ];
+
+        return $created;
     }
 
     public function SetValue(string $ident, mixed $value): void
@@ -249,17 +253,11 @@ function invokePrivate(object $object, string $method, mixed ...$arguments): mix
 }
 
 $GLOBALS['SBC_VARIABLES'] = [
-    10  => ['type' => VARIABLETYPE_BOOLEAN, 'value' => false],
-    11  => ['type' => VARIABLETYPE_STRING, 'value' => 'released'],
-    20  => ['type' => VARIABLETYPE_STRING, 'value' => 'STOP'],
-    30  => ['type' => VARIABLETYPE_INTEGER, 'value' => 50],
-    40  => ['type' => VARIABLETYPE_BOOLEAN, 'value' => false],
-    501 => ['type' => VARIABLETYPE_INTEGER, 'value' => 250],
-    502 => ['type' => VARIABLETYPE_STRING, 'value' => 'ShortPress']
-];
-$GLOBALS['SBC_IDENT_MAP'][4242] = [
-    'LastDuration' => 501,
-    'LastAction'   => 502
+    10 => ['type' => VARIABLETYPE_BOOLEAN, 'value' => false],
+    11 => ['type' => VARIABLETYPE_STRING, 'value' => 'released'],
+    20 => ['type' => VARIABLETYPE_STRING, 'value' => 'STOP'],
+    30 => ['type' => VARIABLETYPE_INTEGER, 'value' => 50],
+    40 => ['type' => VARIABLETYPE_BOOLEAN, 'value' => false]
 ];
 
 $module = new ShutterButton();
@@ -267,22 +265,14 @@ $module->Create();
 assertSameValue(1000, $module->properties['ShortPressTime'], 'The default long-press threshold changed unexpectedly.');
 assertTrue(!isset($module->properties['PositionUp']), 'Unused PositionUp property must not be registered.');
 assertTrue(!isset($module->properties['PositionDown']), 'Unused PositionDown property must not be registered.');
+assertTrue(isset($module->registeredVariables['last_duration_ms']), 'Duration status variable must be created in Create().');
+assertTrue(isset($module->registeredVariables['last_action']), 'Action status variable must be created in Create().');
 
-$module->properties['ButtonID'] = 10;
-$module->properties['MoveID'] = 20;
-$module->properties['PositionID'] = 30;
-$module->ApplyChanges();
-
-assertSameValue(IS_ACTIVE, $module->status, 'A valid configuration must activate the module.');
-assertTrue(isset($module->messages[10][VM_UPDATE]), 'The button update message was not registered.');
-assertSameValue(10, $module->attributes['RegisteredButtonID'], 'The registered button ID attribute is incorrect.');
-assertSameValue(501, $GLOBALS['SBC_IDENT_MAP'][4242]['last_duration_ms'], 'Legacy duration variable was not renamed in place.');
-assertSameValue(502, $GLOBALS['SBC_IDENT_MAP'][4242]['last_action'], 'Legacy action variable was not renamed in place.');
-assertSameValue('short_press', GetValue(502), 'Legacy action value was not normalized.');
-
-$durationPresentation = $module->maintainedVariables['last_duration_ms']['presentation'];
+$durationID = $GLOBALS['SBC_IDENT_MAP'][4242]['last_duration_ms'];
+$actionID = $GLOBALS['SBC_IDENT_MAP'][4242]['last_action'];
+$durationPresentation = $module->registeredVariables['last_duration_ms']['presentation'];
 assertSameValue(' ms', $durationPresentation['SUFFIX'] ?? null, 'Duration presentation must use milliseconds.');
-$actionPresentation = $module->maintainedVariables['last_action']['presentation'];
+$actionPresentation = $module->registeredVariables['last_action']['presentation'];
 assertSameValue(
     VARIABLE_PRESENTATION_VALUE_PRESENTATION,
     $actionPresentation['PRESENTATION'] ?? null,
@@ -292,6 +282,15 @@ $options = json_decode((string) ($actionPresentation['OPTIONS'] ?? ''), true, 51
 assertSameValue('short_press', $options[1]['Value'] ?? null, 'Short-press presentation option is missing.');
 assertSameValue('long_press', $options[2]['Value'] ?? null, 'Long-press presentation option is missing.');
 
+$module->properties['ButtonID'] = 10;
+$module->properties['MoveID'] = 20;
+$module->properties['PositionID'] = 30;
+$module->ApplyChanges();
+
+assertSameValue(IS_ACTIVE, $module->status, 'A valid configuration must activate the module.');
+assertTrue(isset($module->messages[10][VM_UPDATE]), 'The button update message was not registered.');
+assertSameValue(10, $module->attributes['RegisteredButtonID'], 'The registered button ID attribute is incorrect.');
+
 // Short press while opening: position mode 0 means 0=open and 100=closed.
 $GLOBALS['SBC_REQUEST_ACTIONS'] = [];
 $GLOBALS['SBC_VARIABLES'][10]['value'] = true;
@@ -300,8 +299,8 @@ $module->attributes['PressStart'] = microtime(true) - 0.2;
 $GLOBALS['SBC_VARIABLES'][10]['value'] = false;
 $module->MessageSink(time(), 10, VM_UPDATE, []);
 assertSameValue([['id' => 30, 'value' => 0]], $GLOBALS['SBC_REQUEST_ACTIONS'], 'Short opening press must target position 0.');
-assertSameValue('short_press', GetValue(502), 'Short press status was not stored.');
-assertTrue(GetValue(501) >= 150 && GetValue(501) <= 400, 'Short-press duration was not measured plausibly.');
+assertSameValue('short_press', GetValue($actionID), 'Short press status was not stored.');
+assertTrue(GetValue($durationID) >= 150 && GetValue($durationID) <= 400, 'Short-press duration was not measured plausibly.');
 
 // Duplicate release messages must not trigger another action.
 $module->MessageSink(time(), 10, VM_UPDATE, []);
@@ -322,7 +321,7 @@ assertSameValue(
     $GLOBALS['SBC_REQUEST_ACTIONS'],
     'Long opening press must send OPEN followed by STOP.'
 );
-assertSameValue('long_press', GetValue(502), 'Long press status was not stored.');
+assertSameValue('long_press', GetValue($actionID), 'Long press status was not stored.');
 
 // Closing with 0=open / 100=closed must target 100 after a short press.
 $GLOBALS['SBC_REQUEST_ACTIONS'] = [];

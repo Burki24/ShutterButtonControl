@@ -98,6 +98,9 @@ required_markers = [
     "public function Destroy(): void",
     "IntegerPresentation('ms'",
     "OptionsPresentation([",
+    "RegisterStatusVariables();",
+    "RegisterVariableInteger(",
+    "RegisterVariableString(",
     "UpdateButtonRegistration();",
     "UnregisterConfiguredButton();",
     "DetermineConfigurationStatus(): int",
@@ -117,11 +120,14 @@ for forbidden in [
     "IPS_SetVariableProfile",
     "PositionUp",
     "PositionDown",
+    "MigrateLegacyStatusVariables",
+    "MigrateLegacyVariableIdent",
+    "MaintainVariable(",
 ]:
     if forbidden in source:
         raise SystemExit(f"module.php still contains obsolete logic: {forbidden}")
 
-status_idents = re.findall(r"MaintainVariable\(\s*['\"]([^'\"]+)['\"]", source)
+status_idents = re.findall(r'RegisterVariable(?:Boolean|Integer|Float|String)\(\s*[\'"]([^\'"]+)[\'"]', source)
 if status_idents != ["last_duration_ms", "last_action"]:
     raise SystemExit(f"Unexpected status-variable idents: {status_idents}")
 if any(re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*", ident) is None for ident in status_idents):

@@ -43,7 +43,7 @@ Unter **Instanz hinzufügen** das Modul **ShutterButton** auswählen.
 | `last_duration_ms` | Integer | Dauer des letzten vollständigen Tastendrucks in Millisekunden |
 | `last_action` | String | Letzte Aktion: kurzer oder langer Tastendruck |
 
-Das Modul erstellt keine eigenen Variablenprofile. Beide Variablen verwenden native Symcon-Darstellungen aus dem zentralen `VariablePresentationHelper`.
+Das Modul erstellt keine eigenen Variablenprofile. Beide permanent benötigten Statusvariablen werden direkt in `Create()` registriert und verwenden native Symcon-Darstellungen aus dem zentralen `VariablePresentationHelper`. Eine Migration älterer Statusvariablen ist nicht vorgesehen.
 
 ## 6. Visualisierung
 

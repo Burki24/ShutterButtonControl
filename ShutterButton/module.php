@@ -34,6 +34,8 @@ class ShutterButton extends IPSModuleStrict
         $this->RegisterAttributeBoolean('LongPressActive', false);
         $this->RegisterAttributeInteger('RegisteredButtonID', 0);
 
+        $this->RegisterStatusVariables();
+
         $this->RegisterTimer(
             'LongPress',
             0,
@@ -48,8 +50,6 @@ class ShutterButton extends IPSModuleStrict
     {
         parent::ApplyChanges();
 
-        $this->MigrateLegacyStatusVariables();
-        $this->MaintainStatusVariables();
         $this->ResetPressState();
         $this->UpdateButtonRegistration();
 
@@ -263,20 +263,17 @@ class ShutterButton extends IPSModuleStrict
     /**
      * Creates the read-only status variables with native Symcon presentations.
      */
-    private function MaintainStatusVariables(): void
+    private function RegisterStatusVariables(): void
     {
-        $this->MaintainVariable(
+        $this->RegisterVariableInteger(
             'last_duration_ms',
             $this->Translate('Last press duration'),
-            VARIABLETYPE_INTEGER,
             $this->IntegerPresentation('ms', 0, 60000),
-            10,
-            true
+            10
         );
-        $this->MaintainVariable(
+        $this->RegisterVariableString(
             'last_action',
             $this->Translate('Last action'),
-            VARIABLETYPE_STRING,
             $this->OptionsPresentation([
                 [
                     'Value'   => '',
@@ -294,50 +291,8 @@ class ShutterButton extends IPSModuleStrict
                     'Color'   => 0x0066CC
                 ]
             ]),
-            20,
-            true
+            20
         );
-    }
-
-    /**
-     * Renames the two status variables from the original release in place.
-     */
-    private function MigrateLegacyStatusVariables(): void
-    {
-        $this->MigrateLegacyVariableIdent('LastDuration', 'last_duration_ms');
-        $this->MigrateLegacyVariableIdent('LastAction', 'last_action');
-
-        $lastActionID = @IPS_GetObjectIDByIdent('last_action', $this->InstanceID);
-        if ($lastActionID === false) {
-            return;
-        }
-
-        $legacyValue = GetValue($lastActionID);
-        if (!is_string($legacyValue)) {
-            return;
-        }
-
-        $normalizedValue = match ($legacyValue) {
-            'ShortPress' => 'short_press',
-            'LongPress'  => 'long_press',
-            default      => $legacyValue
-        };
-        if ($normalizedValue !== $legacyValue) {
-            SetValue($lastActionID, $normalizedValue);
-        }
-    }
-
-    /**
-     * Renames a legacy variable ident if the new ident is not yet present.
-     */
-    private function MigrateLegacyVariableIdent(string $legacyIdent, string $newIdent): void
-    {
-        $legacyID = @IPS_GetObjectIDByIdent($legacyIdent, $this->InstanceID);
-        if ($legacyID === false || @IPS_GetObjectIDByIdent($newIdent, $this->InstanceID) !== false) {
-            return;
-        }
-
-        IPS_SetIdent($legacyID, $newIdent);
     }
 
     /**
