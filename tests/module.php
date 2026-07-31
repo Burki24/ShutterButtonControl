@@ -180,6 +180,27 @@ class IPSModuleStrict
         return $this->RegisterTestVariable($ident, $name, VARIABLETYPE_STRING, $presentation, $position);
     }
 
+    public function SetValue(string $ident, mixed $value): void
+    {
+        $objectID = $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident];
+        SetValue($objectID, $value);
+    }
+
+    public function SetStatus(int $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function Translate(string $text): string
+    {
+        return $text;
+    }
+
+    public function SendDebug(string $message, mixed $data, int $format): void
+    {
+        $this->debug[] = ['message' => $message, 'data' => (string) $data];
+    }
+
     /** @param array<string, mixed> $presentation */
     private function RegisterTestVariable(
         string $ident,
@@ -202,27 +223,6 @@ class IPSModuleStrict
         ];
 
         return $created;
-    }
-
-    public function SetValue(string $ident, mixed $value): void
-    {
-        $objectID = $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident];
-        SetValue($objectID, $value);
-    }
-
-    public function SetStatus(int $status): void
-    {
-        $this->status = $status;
-    }
-
-    public function Translate(string $text): string
-    {
-        return $text;
-    }
-
-    public function SendDebug(string $message, mixed $data, int $format): void
-    {
-        $this->debug[] = ['message' => $message, 'data' => (string) $data];
     }
 }
 

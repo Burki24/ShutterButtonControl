@@ -46,8 +46,9 @@ library = load_json(ROOT / "library.json")
 compatibility = library.get("compatibility")
 if not isinstance(compatibility, dict) or compatibility.get("version") != "9.0":
     raise SystemExit("library.json must require Symcon 9.0.")
-if library.get("version") != "1.1":
-    raise SystemExit("The modernization release must use library version 1.1.")
+version = library.get("version")
+if not isinstance(version, str) or re.fullmatch(r"\d+\.\d+", version) is None:
+    raise SystemExit("library.json version must use the format major.minor.")
 if not isinstance(library.get("build"), int) or not isinstance(library.get("date"), int):
     raise SystemExit("library.json build and date must be integers.")
 
