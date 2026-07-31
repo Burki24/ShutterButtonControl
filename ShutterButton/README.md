@@ -17,7 +17,7 @@ Beschreibung des Moduls.
 
 ### 2. Voraussetzungen
 
-- Symcon ab Version 7.1
+- Symcon ab Version 9.0
 
 ### 3. Software-Installation
 
