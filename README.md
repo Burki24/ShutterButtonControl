@@ -4,7 +4,7 @@ Symcon Modul zur Steuerung von Rollläden über Taster (z. B. SODA S8 Griff).
 Unterscheidet zwischen kurzem und langem Tastendruck und steuert entsprechend die Rollladenbewegung.
 
 ![Version](https://img.shields.io/badge/version-1.0-blue.svg)
-![Symcon](https://img.shields.io/badge/Symcon-7.1+-green.svg)
+![Symcon](https://img.shields.io/badge/Symcon-9.0+-green.svg)
 [![Symcon PHP SDK](https://img.shields.io/badge/Symcon-PHP%20Modul-orange)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -36,7 +36,7 @@ Steuert Rollläden über Taster und unterscheidet zwischen kurzem und langem Tas
 
 ## Voraussetzungen
 
-- Symcon ab Version 7.1  
+- Symcon ab Version 9.0  
 - Unterstützte Variablen:
   - Button (Boolean oder Enum → pressed/released)
   - Shutter Bewegung (String, z. B. OPEN/CLOSE/STOP)
@@ -49,7 +49,7 @@ Steuert Rollläden über Taster und unterscheidet zwischen kurzem und langem Tas
 ### Über Module Control
 
 [Zum Modul
-](https://github.com/Burki24/IPS_ShutterButtonControl)
+](https://github.com/Burki24/ShutterButtonControl)
 
 ---
 
