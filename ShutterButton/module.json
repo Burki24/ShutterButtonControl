@@ -2,7 +2,7 @@
     "id": "{12BA38E7-C7CE-9CCA-C8AB-B18BFADD5632}",
     "name": "ShutterButton",
     "type": 3,
-    "vendor": "Burki24",
+    "vendor": "Burkhard Kneiseler",
     "aliases": [
         "Shutter Button"
     ],
@@ -10,5 +10,5 @@
     "childRequirements": [],
     "implemented": [],
     "prefix": "SBC",
-    "url": "https://github.com/Burki24/IPS_ShutterButtonControl"
+    "url": "https://github.com/Burki24/ShutterButtonControl"
 }
