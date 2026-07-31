@@ -2,9 +2,9 @@
     "id": "{BF1D68F2-85F4-620A-1237-7EABE668FAD1}",
     "author": "Burkhard Kneiseler",
     "name": "ShutterButtonControl",
-    "url": "https://github.com/Burki24/IPS_ShutterButtonControl",
+    "url": "https://github.com/Burki24/ShutterButtonControl",
     "compatibility": {
-        "version": "7.1"
+        "version": "9.0"
     },
     "version": "1.0",
     "build": 0,
