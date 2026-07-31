@@ -1,67 +1,54 @@
 # ShutterButton
-Beschreibung des Moduls.
 
-### Inhaltsverzeichnis
+## 1. Funktionsumfang
 
-1. [Funktionsumfang](#1-funktionsumfang)
-2. [Voraussetzungen](#2-voraussetzungen)
-3. [Software-Installation](#3-software-installation)
-4. [Einrichten der Instanzen in Symcon](#4-einrichten-der-instanzen-in-symcon)
-5. [Statusvariablen und Profile](#5-statusvariablen-und-profile)
-6. [WebFront](#6-webfront)
-7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+Das Modul wertet eine Tastervariable aus und steuert abhängig von der Druckdauer einen Rollladen:
 
-### 1. Funktionsumfang
+- **Kurzer Tastendruck:** Die konfigurierte Endposition wird über die Positionsvariable angefahren.
+- **Langer Tastendruck:** Die Bewegung wird über `OPEN` oder `CLOSE` gestartet. Beim Loslassen sendet das Modul `STOP`.
+- Die letzte erkannte Aktion und Druckdauer werden als Statusvariablen angezeigt.
 
-*
-
-### 2. Voraussetzungen
+## 2. Voraussetzungen
 
 - Symcon ab Version 9.0
+- Tastervariable als Boolean, Integer/Float mit 0 und 1 oder String mit gebräuchlichen Zuständen wie `pressed`/`released` beziehungsweise `on`/`off`
+- Bewegungsvariable vom Typ String mit einer ausführbaren Aktion
+- Positionsvariable vom Typ Integer oder Float mit einer ausführbaren Aktion
 
-### 3. Software-Installation
+## 3. Software-Installation
 
-* Über den Module Store das 'ShutterButton'-Modul installieren.
-* Alternativ über das Module Control folgende URL hinzufügen
+Über das Module Control folgende Repository-URL hinzufügen:
 
-### 4. Einrichten der Instanzen in Symcon
+```text
+https://github.com/Burki24/ShutterButtonControl
+```
 
- Unter 'Instanz hinzufügen' kann das 'ShutterButton'-Modul mithilfe des Schnellfilters gefunden werden.  
-	- Weitere Informationen zum Hinzufügen von Instanzen in der [Dokumentation der Instanzen](https://www.symcon.de/service/dokumentation/konzepte/instanzen/#Instanz_hinzufügen)
+## 4. Einrichten der Instanz
 
-__Konfigurationsseite__:
+Unter **Instanz hinzufügen** das Modul **ShutterButton** auswählen.
 
-Name     | Beschreibung
--------- | ------------------
-         |
-         |
+| Einstellung | Beschreibung |
+| --- | --- |
+| Tastervariable | Liefert den gedrückten und losgelassenen Zustand |
+| Bewegungsvariable | Erwartet `OPEN`, `CLOSE` und `STOP` |
+| Positionsvariable | Erwartet einen Zielwert zwischen 0 und 100 |
+| Richtung | Bestimmt, ob dieser Taster öffnet oder schließt |
+| Positionslogik | Ordnet offen/geschlossen den Werten 0 und 100 zu |
+| Grenze langer Tastendruck | Zeit, ab der die kontinuierliche Bewegung startet |
 
-### 5. Statusvariablen und Profile
+## 5. Statusvariablen und Darstellungen
 
-Die Statusvariablen/Kategorien werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
+| Ident | Typ | Beschreibung |
+| --- | --- | --- |
+| `last_duration_ms` | Integer | Dauer des letzten vollständigen Tastendrucks in Millisekunden |
+| `last_action` | String | Letzte Aktion: kurzer oder langer Tastendruck |
 
-#### Statusvariablen
+Das Modul erstellt keine eigenen Variablenprofile. Beide Variablen verwenden native Symcon-Darstellungen aus dem zentralen `VariablePresentationHelper`.
 
-Name   | Typ     | Beschreibung
------- | ------- | ------------
-       |         |
-       |         |
+## 6. Visualisierung
 
-#### Profile
+Die Statusvariablen können bei Bedarf in der Symcon-Visualisierung angezeigt werden. Die Rollladensteuerung selbst erfolgt über den angebundenen physischen oder virtuellen Taster.
 
-Name   | Typ
------- | -------
-       |
-       |
+## 7. PHP-Befehlsreferenz
 
-### 6. Visualisierung
-
-Die Funktionalität, die das Modul in der Visualisierung bietet.
-
-### 7. PHP-Befehlsreferenz
-
-`boolean SBC_BeispielFunktion(integer $InstanzID);`
-Erklärung der Funktion.
-
-Beispiel:
-`SBC_BeispielFunktion(12345);`
+Das Modul besitzt keine zusätzliche öffentliche PHP-API. Die Verarbeitung erfolgt automatisch über die konfigurierte Tastervariable.

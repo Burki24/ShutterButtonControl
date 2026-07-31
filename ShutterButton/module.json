@@ -4,11 +4,12 @@
     "type": 3,
     "vendor": "Burkhard Kneiseler",
     "aliases": [
-        "Shutter Button"
+        "Shutter Button",
+        "Rollladen-Tastersteuerung"
     ],
     "parentRequirements": [],
     "childRequirements": [],
     "implemented": [],
     "prefix": "SBC",
-    "url": "https://github.com/Burki24/ShutterButtonControl"
+    "url": "https://github.com/Burki24/ShutterButtonControl/tree/main/ShutterButton"
 }

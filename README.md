@@ -1,104 +1,47 @@
-# IPS ShutterButtonControl
+# ShutterButtonControl
 
-Symcon Modul zur Steuerung von Rollläden über Taster (z. B. SODA S8 Griff).  
-Unterscheidet zwischen kurzem und langem Tastendruck und steuert entsprechend die Rollladenbewegung.
+Symcon-Bibliothek zur Steuerung eines Rollladens über einen Taster. Ein kurzer Tastendruck fährt eine Endposition an; Gedrückthalten startet die kontinuierliche Bewegung und Loslassen sendet `STOP`.
 
-![Version](https://img.shields.io/badge/version-1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1-blue.svg)
 ![Symcon](https://img.shields.io/badge/Symcon-9.0+-green.svg)
-[![Symcon PHP SDK](https://img.shields.io/badge/Symcon-PHP%20Modul-orange)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
----
 
 ## Enthaltenes Modul
 
 ### ShutterButton
 
-Steuert Rollläden über Taster und unterscheidet zwischen kurzem und langem Tastendruck.
+Verknüpft eine Tastervariable mit einer Bewegungs- und einer Positionsvariable eines Rollladens.
 
----
+## Funktionen
 
-## Funktionsumfang
-
-- ShortPress / LongPress Erkennung
-- Steuerung über:
-  - Positionsvariable (Integer, 0–100)
-  - Bewegungsvariable (String, z. B. OPEN/CLOSE)
-- Unterstützung verschiedener Geräte-Logiken
-- Konfigurierbare Dauer für kurzen Tastendruck
-- Konfigurierbare Positionslogik:
-  - 0 = offen / 100 = geschlossen
-  - 0 = geschlossen / 100 = offen
-- Debug-Ausgaben zur Analyse
-- Anzeige der letzten Aktion und Tastdauer
-
----
+- Unterscheidung zwischen kurzem und langem Tastendruck
+- Kurzer Tastendruck: Anfahren der konfigurierten Endposition
+- Langer Tastendruck: `OPEN` oder `CLOSE`; beim Loslassen `STOP`
+- Unterstützung für Boolean-, 0/1- und gebräuchliche Textzustände
+- Native Symcon-9-Darstellungen ohne eigene Variablenprofile
+- Bereinigung alter Nachrichtenregistrierungen beim Wechsel der Tastervariable
+- Anzeige der letzten Aktion und Druckdauer
 
 ## Voraussetzungen
 
-- Symcon ab Version 9.0  
-- Unterstützte Variablen:
-  - Button (Boolean oder Enum → pressed/released)
-  - Shutter Bewegung (String, z. B. OPEN/CLOSE/STOP)
-  - Shutter Position (Integer, 0–100)
-
----
+- Symcon ab Version 9.0
+- Bewegungsvariable vom Typ String mit einer Aktion für `OPEN`, `CLOSE` und `STOP`
+- Numerische Positionsvariable mit einer Aktion für Werte von 0 bis 100
 
 ## Installation
 
-### Über Module Control
+Die Repository-URL im Symcon Module Control hinzufügen:
 
-[Zum Modul
-](https://github.com/Burki24/ShutterButtonControl)
+```text
+https://github.com/Burki24/ShutterButtonControl
+```
 
----
+Die Moduldetails stehen in der [Moduldokumentation](ShutterButton/README.md).
 
-## 🔧 Konfiguration
+## Entwicklung
 
-| Einstellung | Beschreibung |
-|------------|-------------|
-| Button Variable | Taster (pressed / released) |
-| Shutter Bewegung | Variable für OPEN / CLOSE / STOP |
-| Shutter Position | Variable für Positionssteuerung |
-| Richtung | Hoch oder Runter |
-| kurzer Tastendruck (ms) | Schwelle zwischen kurz/lang |
-| Positionslogik | Zuordnung von 0 und 100 |
-
----
-
-## Funktionsweise
-
-### Kurzer Tastendruck
-
-- Setzt die Zielposition des Rollladens
-- Wert abhängig von der Positionslogik
-
----
-
-### Langer Tastendruck
-
-- Startet die Bewegung (OPEN oder CLOSE)
-- Beim Loslassen:
-  - STOP (falls unterstützt)
-
----
-
-## Hinweise
-
-- Die verwendeten Werte (`OPEN`, `CLOSE`, `STOP`) sind gerätespezifisch  
-- Nicht alle Geräte unterstützen `STOP`  
-- Positionswerte können je nach System invertiert sein  
-- Debug-Ausgaben helfen bei der Analyse  
-
----
-
-## Entwicklung & SDK
-
-Dieses Modul basiert auf dem offiziellen  
-[Symcon PHP SDK](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-
----
+Das Repository enthält Tests für Struktur, Helper-Integrität, Tasterlogik, Nachrichtenregistrierung, native Variablendarstellungen und Metadatenversionierung.
 
 ## Lizenz
 
-Dieses Projekt steht unter der MIT License.
+MIT-Lizenz, siehe [LICENSE](LICENSE).
