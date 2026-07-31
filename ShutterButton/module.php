@@ -254,9 +254,9 @@ class ShutterButton extends IPSModuleStrict
         }
 
         return match (strtolower(trim($value))) {
-            'pressed', 'press', 'down', 'on', 'true', '1'  => true,
+            'pressed', 'press', 'down', 'on', 'true', '1'    => true,
             'released', 'release', 'up', 'off', 'false', '0' => false,
-            default                                           => null
+            default                                          => null
         };
     }
 

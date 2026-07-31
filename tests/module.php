@@ -374,4 +374,4 @@ assertTrue($module->destroyed, 'Parent Destroy() was not called.');
 assertTrue(!isset($module->messages[10][VM_UPDATE]), 'Button registration must be removed during Destroy().');
 assertSameValue(0, $module->timers['LongPress'], 'Long-press timer must be stopped during Destroy().');
 
-print("ShutterButton module regression tests passed.\n");
+echo "ShutterButton module regression tests passed.\n";
