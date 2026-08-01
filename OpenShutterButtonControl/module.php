@@ -6,7 +6,7 @@ require_once __DIR__ . '/../libs/helper/VariablePresentationHelper.php';
 
 use Burki24\SymconModuleHelper\VariablePresentationHelper;
 
-class ShutterButton extends IPSModuleStrict
+class OpenShutterButtonControl extends IPSModuleStrict
 {
     use VariablePresentationHelper;
 

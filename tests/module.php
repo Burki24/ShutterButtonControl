@@ -18,37 +18,37 @@ foreach ($constants as $constant => $value) {
     }
 }
 
-/** @var array<int, array{type: int, value: mixed}> $GLOBALS['SBC_VARIABLES'] */
-$GLOBALS['SBC_VARIABLES'] = [];
-/** @var array<int, array<string, int>> $GLOBALS['SBC_IDENT_MAP'] */
-$GLOBALS['SBC_IDENT_MAP'] = [];
-/** @var list<array{id: int, value: mixed}> $GLOBALS['SBC_REQUEST_ACTIONS'] */
-$GLOBALS['SBC_REQUEST_ACTIONS'] = [];
+/** @var array<int, array{type: int, value: mixed}> $GLOBALS['OSBC_VARIABLES'] */
+$GLOBALS['OSBC_VARIABLES'] = [];
+/** @var array<int, array<string, int>> $GLOBALS['OSBC_IDENT_MAP'] */
+$GLOBALS['OSBC_IDENT_MAP'] = [];
+/** @var list<array{id: int, value: mixed}> $GLOBALS['OSBC_REQUEST_ACTIONS'] */
+$GLOBALS['OSBC_REQUEST_ACTIONS'] = [];
 
 function IPS_VariableExists(int $variableID): bool
 {
-    return isset($GLOBALS['SBC_VARIABLES'][$variableID]);
+    return isset($GLOBALS['OSBC_VARIABLES'][$variableID]);
 }
 
 /** @return array{VariableType: int} */
 function IPS_GetVariable(int $variableID): array
 {
-    return ['VariableType' => $GLOBALS['SBC_VARIABLES'][$variableID]['type']];
+    return ['VariableType' => $GLOBALS['OSBC_VARIABLES'][$variableID]['type']];
 }
 
 function GetValue(int $variableID): mixed
 {
-    return $GLOBALS['SBC_VARIABLES'][$variableID]['value'];
+    return $GLOBALS['OSBC_VARIABLES'][$variableID]['value'];
 }
 
 function SetValue(int $variableID, mixed $value): void
 {
-    $GLOBALS['SBC_VARIABLES'][$variableID]['value'] = $value;
+    $GLOBALS['OSBC_VARIABLES'][$variableID]['value'] = $value;
 }
 
 function RequestAction(int $variableID, mixed $value): void
 {
-    $GLOBALS['SBC_REQUEST_ACTIONS'][] = ['id' => $variableID, 'value' => $value];
+    $GLOBALS['OSBC_REQUEST_ACTIONS'][] = ['id' => $variableID, 'value' => $value];
 }
 
 class IPSModuleStrict
@@ -180,7 +180,7 @@ class IPSModuleStrict
 
     public function SetValue(string $ident, mixed $value): void
     {
-        $objectID = $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident];
+        $objectID = $GLOBALS['OSBC_IDENT_MAP'][$this->InstanceID][$ident];
         SetValue($objectID, $value);
     }
 
@@ -207,10 +207,10 @@ class IPSModuleStrict
         array $presentation,
         int $position
     ): bool {
-        $created = !isset($GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident]);
-        $objectID = $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident] ?? 10000 + count($this->registeredVariables);
-        $GLOBALS['SBC_IDENT_MAP'][$this->InstanceID][$ident] = $objectID;
-        $GLOBALS['SBC_VARIABLES'][$objectID] ??= ['type' => $type, 'value' => $type === VARIABLETYPE_STRING ? '' : 0];
+        $created = !isset($GLOBALS['OSBC_IDENT_MAP'][$this->InstanceID][$ident]);
+        $objectID = $GLOBALS['OSBC_IDENT_MAP'][$this->InstanceID][$ident] ?? 10000 + count($this->registeredVariables);
+        $GLOBALS['OSBC_IDENT_MAP'][$this->InstanceID][$ident] = $objectID;
+        $GLOBALS['OSBC_VARIABLES'][$objectID] ??= ['type' => $type, 'value' => $type === VARIABLETYPE_STRING ? '' : 0];
         $this->registeredVariables[$ident] = [
             'name'         => $name,
             'type'         => $type,
@@ -223,7 +223,7 @@ class IPSModuleStrict
     }
 }
 
-require_once __DIR__ . '/../ShutterButton/module.php';
+require_once __DIR__ . '/../OpenShutterButtonControl/module.php';
 
 function assertSameValue(mixed $expected, mixed $actual, string $message): void
 {
@@ -249,7 +249,7 @@ function invokePrivate(object $object, string $method, mixed ...$arguments): mix
     return $reflection->invoke($object, ...$arguments);
 }
 
-$GLOBALS['SBC_VARIABLES'] = [
+$GLOBALS['OSBC_VARIABLES'] = [
     10 => ['type' => VARIABLETYPE_BOOLEAN, 'value' => false],
     11 => ['type' => VARIABLETYPE_STRING, 'value' => 'released'],
     20 => ['type' => VARIABLETYPE_STRING, 'value' => 'STOP'],
@@ -257,7 +257,7 @@ $GLOBALS['SBC_VARIABLES'] = [
     40 => ['type' => VARIABLETYPE_BOOLEAN, 'value' => false]
 ];
 
-$module = new ShutterButton();
+$module = new OpenShutterButtonControl();
 $module->Create();
 assertSameValue(1000, $module->properties['ShortPressTime'], 'The default long-press threshold changed unexpectedly.');
 assertTrue(!isset($module->properties['PositionUp']), 'Unused PositionUp property must not be registered.');
@@ -265,8 +265,8 @@ assertTrue(!isset($module->properties['PositionDown']), 'Unused PositionDown pro
 assertTrue(isset($module->registeredVariables['last_duration_ms']), 'Duration status variable must be created in Create().');
 assertTrue(isset($module->registeredVariables['last_action']), 'Action status variable must be created in Create().');
 
-$durationID = $GLOBALS['SBC_IDENT_MAP'][4242]['last_duration_ms'];
-$actionID = $GLOBALS['SBC_IDENT_MAP'][4242]['last_action'];
+$durationID = $GLOBALS['OSBC_IDENT_MAP'][4242]['last_duration_ms'];
+$actionID = $GLOBALS['OSBC_IDENT_MAP'][4242]['last_action'];
 $durationPresentation = $module->registeredVariables['last_duration_ms']['presentation'];
 assertSameValue(' ms', $durationPresentation['SUFFIX'] ?? null, 'Duration presentation must use milliseconds.');
 $actionPresentation = $module->registeredVariables['last_action']['presentation'];
@@ -289,46 +289,46 @@ assertTrue(isset($module->messages[10][VM_UPDATE]), 'The button update message w
 assertSameValue(10, $module->attributes['RegisteredButtonID'], 'The registered button ID attribute is incorrect.');
 
 // Short press while opening: position mode 0 means 0=open and 100=closed.
-$GLOBALS['SBC_REQUEST_ACTIONS'] = [];
-$GLOBALS['SBC_VARIABLES'][10]['value'] = true;
+$GLOBALS['OSBC_REQUEST_ACTIONS'] = [];
+$GLOBALS['OSBC_VARIABLES'][10]['value'] = true;
 $module->MessageSink(time(), 10, VM_UPDATE, []);
 $module->attributes['PressStart'] = microtime(true) - 0.2;
-$GLOBALS['SBC_VARIABLES'][10]['value'] = false;
+$GLOBALS['OSBC_VARIABLES'][10]['value'] = false;
 $module->MessageSink(time(), 10, VM_UPDATE, []);
-assertSameValue([['id' => 30, 'value' => 0]], $GLOBALS['SBC_REQUEST_ACTIONS'], 'Short opening press must target position 0.');
+assertSameValue([['id' => 30, 'value' => 0]], $GLOBALS['OSBC_REQUEST_ACTIONS'], 'Short opening press must target position 0.');
 assertSameValue('short_press', GetValue($actionID), 'Short press status was not stored.');
 assertTrue(GetValue($durationID) >= 150 && GetValue($durationID) <= 400, 'Short-press duration was not measured plausibly.');
 
 // Duplicate release messages must not trigger another action.
 $module->MessageSink(time(), 10, VM_UPDATE, []);
-assertSameValue(1, count($GLOBALS['SBC_REQUEST_ACTIONS']), 'Duplicate release update triggered an extra action.');
+assertSameValue(1, count($GLOBALS['OSBC_REQUEST_ACTIONS']), 'Duplicate release update triggered an extra action.');
 
 // Long press while opening: OPEN on threshold, STOP on release.
-$GLOBALS['SBC_REQUEST_ACTIONS'] = [];
-$GLOBALS['SBC_VARIABLES'][10]['value'] = true;
+$GLOBALS['OSBC_REQUEST_ACTIONS'] = [];
+$GLOBALS['OSBC_VARIABLES'][10]['value'] = true;
 $module->MessageSink(time(), 10, VM_UPDATE, []);
 $module->RequestAction('HandleLongPress', 0);
-$GLOBALS['SBC_VARIABLES'][10]['value'] = false;
+$GLOBALS['OSBC_VARIABLES'][10]['value'] = false;
 $module->MessageSink(time(), 10, VM_UPDATE, []);
 assertSameValue(
     [
         ['id' => 20, 'value' => 'OPEN'],
         ['id' => 20, 'value' => 'STOP']
     ],
-    $GLOBALS['SBC_REQUEST_ACTIONS'],
+    $GLOBALS['OSBC_REQUEST_ACTIONS'],
     'Long opening press must send OPEN followed by STOP.'
 );
 assertSameValue('long_press', GetValue($actionID), 'Long press status was not stored.');
 
 // Closing with 0=open / 100=closed must target 100 after a short press.
-$GLOBALS['SBC_REQUEST_ACTIONS'] = [];
+$GLOBALS['OSBC_REQUEST_ACTIONS'] = [];
 $module->properties['Direction'] = 1;
-$GLOBALS['SBC_VARIABLES'][10]['value'] = true;
+$GLOBALS['OSBC_VARIABLES'][10]['value'] = true;
 $module->MessageSink(time(), 10, VM_UPDATE, []);
 $module->attributes['PressStart'] = microtime(true) - 0.1;
-$GLOBALS['SBC_VARIABLES'][10]['value'] = false;
+$GLOBALS['OSBC_VARIABLES'][10]['value'] = false;
 $module->MessageSink(time(), 10, VM_UPDATE, []);
-assertSameValue([['id' => 30, 'value' => 100]], $GLOBALS['SBC_REQUEST_ACTIONS'], 'Short closing press must target position 100.');
+assertSameValue([['id' => 30, 'value' => 100]], $GLOBALS['OSBC_REQUEST_ACTIONS'], 'Short closing press must target position 100.');
 
 assertSameValue(true, invokePrivate($module, 'MapButtonState', 'pressed'), 'Text state pressed must map to true.');
 assertSameValue(false, invokePrivate($module, 'MapButtonState', 'OFF'), 'Text state OFF must map to false.');
@@ -370,4 +370,4 @@ assertTrue($module->destroyed, 'Parent Destroy() was not called.');
 assertTrue(!isset($module->messages[10][VM_UPDATE]), 'Button registration must be removed during Destroy().');
 assertSameValue(0, $module->timers['LongPress'], 'Long-press timer must be stopped during Destroy().');
 
-echo "ShutterButton module regression tests passed.\n";
+echo "OpenShutterButtonControl module regression tests passed.\n";

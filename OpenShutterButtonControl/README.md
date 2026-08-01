@@ -1,4 +1,4 @@
-# ShutterButton
+# OpenShutterButtonControl
 
 ## 1. Funktionsumfang
 
@@ -7,6 +7,7 @@ Das Modul wertet eine Tastervariable aus und steuert abhängig von der Druckdaue
 - **Kurzer Tastendruck:** Die konfigurierte Endposition wird über die Positionsvariable angefahren.
 - **Langer Tastendruck:** Die Bewegung wird über `OPEN` oder `CLOSE` gestartet. Beim Loslassen sendet das Modul `STOP`.
 - Die letzte erkannte Aktion und Druckdauer werden als Statusvariablen angezeigt.
+- Die Anbindung ist herstellerunabhängig, sofern die verwendeten Variablen die dokumentierten Werte und Aktionen bereitstellen.
 
 ## 2. Voraussetzungen
 
@@ -20,12 +21,12 @@ Das Modul wertet eine Tastervariable aus und steuert abhängig von der Druckdaue
 Über das Module Control folgende Repository-URL hinzufügen:
 
 ```text
-https://github.com/Burki24/ShutterButtonControl
+https://github.com/Burki24/OpenShutterButtonControl
 ```
 
 ## 4. Einrichten der Instanz
 
-Unter **Instanz hinzufügen** das Modul **ShutterButton** auswählen.
+Unter **Instanz hinzufügen** das Modul **OpenShutterButtonControl** auswählen.
 
 | Einstellung | Beschreibung |
 | --- | --- |
@@ -43,7 +44,7 @@ Unter **Instanz hinzufügen** das Modul **ShutterButton** auswählen.
 | `last_duration_ms` | Integer | Dauer des letzten vollständigen Tastendrucks in Millisekunden |
 | `last_action` | String | Letzte Aktion: kurzer oder langer Tastendruck |
 
-Das Modul erstellt keine eigenen Variablenprofile. Beide permanent benötigten Statusvariablen werden direkt in `Create()` registriert und verwenden native Symcon-Darstellungen aus dem zentralen `VariablePresentationHelper`. Eine Migration älterer Statusvariablen ist nicht vorgesehen.
+Das Modul erstellt keine eigenen Variablenprofile. Beide permanent benötigten Statusvariablen werden direkt in `Create()` registriert und verwenden native Symcon-Darstellungen aus dem zentralen `VariablePresentationHelper`.
 
 ## 6. Visualisierung
 
