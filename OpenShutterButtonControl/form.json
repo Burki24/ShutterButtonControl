@@ -1,0 +1,110 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "Configure the button and the two shutter control variables."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Button input",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "SelectVariable",
+                    "name": "ButtonID",
+                    "caption": "Button variable"
+                },
+                {
+                    "type": "Label",
+                    "caption": "Supported states are Boolean, 0/1 and common text values such as pressed/released or on/off."
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Shutter control",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "SelectVariable",
+                    "name": "MoveID",
+                    "caption": "Movement variable (OPEN/CLOSE/STOP)"
+                },
+                {
+                    "type": "SelectVariable",
+                    "name": "PositionID",
+                    "caption": "Position variable (0-100)"
+                },
+                {
+                    "type": "Select",
+                    "name": "Direction",
+                    "caption": "Direction",
+                    "options": [
+                        {
+                            "caption": "Open shutter",
+                            "value": 0
+                        },
+                        {
+                            "caption": "Close shutter",
+                            "value": 1
+                        }
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "PositionMode",
+                    "caption": "Position logic",
+                    "options": [
+                        {
+                            "caption": "0 = open / 100 = closed",
+                            "value": 0
+                        },
+                        {
+                            "caption": "0 = closed / 100 = open",
+                            "value": 1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Button timing",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "ShortPressTime",
+                    "caption": "Long-press threshold",
+                    "minimum": 100,
+                    "maximum": 5000,
+                    "step": 100,
+                    "suffix": " ms",
+                    "width": "220px"
+                },
+                {
+                    "type": "Label",
+                    "caption": "A short press moves to the configured end position. Holding the button starts movement; releasing it sends STOP."
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "The button variable is missing or has an unsupported type."
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "The movement variable must be a string variable."
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "The position variable must be numeric."
+        }
+    ]
+}

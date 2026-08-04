@@ -1,0 +1,12 @@
+{
+    "id": "{12BA38E7-C7CE-9CCA-C8AB-B18BFADD5632}",
+    "name": "OpenShutterButtonControl",
+    "type": 3,
+    "vendor": "Burki24",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "OSBC",
+    "url": "https://github.com/Burki24/OpenShutterButtonControl"
+}

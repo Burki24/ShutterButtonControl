@@ -1,0 +1,6 @@
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*.phar
+.php-cs-fixer.cache

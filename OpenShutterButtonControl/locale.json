@@ -1,0 +1,30 @@
+{
+    "translations": {
+        "de": {
+            "Configure the button and the two shutter control variables.": "Konfigurieren Sie den Taster und die beiden Variablen zur Rollladensteuerung.",
+            "Button input": "Tastereingang",
+            "Button variable": "Tastervariable",
+            "Supported states are Boolean, 0/1 and common text values such as pressed/released or on/off.": "Unterstützt werden Boolean, 0/1 sowie gebräuchliche Textwerte wie pressed/released oder on/off.",
+            "Shutter control": "Rollladensteuerung",
+            "Movement variable (OPEN/CLOSE/STOP)": "Bewegungsvariable (OPEN/CLOSE/STOP)",
+            "Position variable (0-100)": "Positionsvariable (0-100)",
+            "Direction": "Richtung",
+            "Open shutter": "Rollladen öffnen",
+            "Close shutter": "Rollladen schließen",
+            "Position logic": "Positionslogik",
+            "0 = open / 100 = closed": "0 = offen / 100 = geschlossen",
+            "0 = closed / 100 = open": "0 = geschlossen / 100 = offen",
+            "Button timing": "Tasterzeit",
+            "Long-press threshold": "Grenze langer Tastendruck",
+            "A short press moves to the configured end position. Holding the button starts movement; releasing it sends STOP.": "Ein kurzer Tastendruck fährt die konfigurierte Endposition an. Gedrückthalten startet die Bewegung; beim Loslassen wird STOP gesendet.",
+            "The button variable is missing or has an unsupported type.": "Die Tastervariable fehlt oder hat einen nicht unterstützten Typ.",
+            "The movement variable must be a string variable.": "Die Bewegungsvariable muss eine Stringvariable sein.",
+            "The position variable must be numeric.": "Die Positionsvariable muss numerisch sein.",
+            "Last press duration": "Letzte Druckdauer",
+            "Last action": "Letzte Aktion",
+            "No action yet": "Noch keine Aktion",
+            "Short press": "Kurzer Tastendruck",
+            "Long press": "Langer Tastendruck"
+        }
+    }
+}
