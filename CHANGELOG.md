@@ -4,6 +4,20 @@ Alle wesentlichen Änderungen an der Library **OpenShutterButtonControl** werden
 
 ## Unveröffentlicht
 
+### Review-Härtung
+
+- Initialisierung fremder Variablen auf `KR_READY` beziehungsweise `IPS_KERNELSTARTED` umgestellt.
+- Variablentypen und notwendige Aktionen werden im Konfigurationsformular und zusätzlich zur Laufzeit geprüft.
+- Eigene Statusmeldungen für unvollständige Konfiguration, fehlende Aktionen und ungültige Eigenschaftswerte ergänzt.
+- Alle konfigurierten Variablen werden als Symcon-Objektreferenzen registriert und bei Änderungen sauber aktualisiert.
+- Die tatsächlich gestartete Bewegungsvariable wird gespeichert und bei Loslassen, `ApplyChanges()` oder `Destroy()` einmalig mit `STOP` beendet.
+- Verzögerte Timer-Ausführung erzeugt weiterhin eine vollständige Sequenz aus `OPEN`/`CLOSE` und `STOP`.
+- Positionsbefehle werden typgerecht als Integer oder Float an die Zielvariable übergeben.
+- Regressionstests für Kernelstart, Variablenaktionen, Eigenschaften, Referenzen und sichere Bewegungsbeendigung ergänzt.
+- Statisches Versions-Badge durch das aktuelle GitHub-Release-Badge ersetzt.
+
+## 1.7 – 2026-08-04
+
 ### Vereinheitlichung
 
 - Repository, Library, Modul, Klasse und Verzeichnis wurden vollständig auf `OpenShutterButtonControl` vereinheitlicht.
