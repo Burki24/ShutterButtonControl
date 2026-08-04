@@ -2,7 +2,7 @@
 
 Alle wesentlichen Änderungen an der Library **OpenShutterButtonControl** werden in dieser Datei dokumentiert.
 
-## Unveröffentlicht
+## 1.12 – 2026-08-04
 
 ### Review-Härtung
 
