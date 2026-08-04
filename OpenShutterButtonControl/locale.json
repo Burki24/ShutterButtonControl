@@ -24,7 +24,13 @@
             "Last action": "Letzte Aktion",
             "No action yet": "Noch keine Aktion",
             "Short press": "Kurzer Tastendruck",
-            "Long press": "Langer Tastendruck"
+            "Long press": "Langer Tastendruck",
+            "The movement variable has no executable action.": "Die Bewegungsvariable besitzt keine ausführbare Aktion.",
+            "The position variable has no executable action.": "Die Positionsvariable besitzt keine ausführbare Aktion.",
+            "The long-press threshold must be between 100 and 5000 milliseconds.": "Die Grenze für einen langen Tastendruck muss zwischen 100 und 5000 Millisekunden liegen.",
+            "The configured direction is invalid.": "Die konfigurierte Richtung ist ungültig.",
+            "The configured position logic is invalid.": "Die konfigurierte Positionslogik ist ungültig.",
+            "The configuration is incomplete.": "Die Konfiguration ist unvollständig."
         }
     }
 }

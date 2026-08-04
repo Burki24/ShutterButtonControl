@@ -14,9 +14,11 @@ class OpenShutterButtonControl extends IPSModuleStrict
     private const DIRECTION_DOWN = 1;
     private const POSITION_MODE_ZERO_OPEN = 0;
     private const POSITION_MODE_HUNDRED_OPEN = 1;
+    private const MIN_PRESS_TIME = 100;
+    private const MAX_PRESS_TIME = 5000;
 
     /**
-     * Registers properties, attributes and the long-press timer.
+     * Registers properties, attributes, messages and the long-press timer.
      */
     public function Create(): void
     {
@@ -32,9 +34,12 @@ class OpenShutterButtonControl extends IPSModuleStrict
         $this->RegisterAttributeFloat('PressStart', 0.0);
         $this->RegisterAttributeBoolean('ButtonPressed', false);
         $this->RegisterAttributeBoolean('LongPressActive', false);
+        $this->RegisterAttributeInteger('ActiveMoveID', 0);
         $this->RegisterAttributeInteger('RegisteredButtonID', 0);
+        $this->RegisterAttributeString('RegisteredReferences', '[]');
 
         $this->RegisterStatusVariables();
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
 
         $this->RegisterTimer(
             'LongPress',
@@ -44,31 +49,45 @@ class OpenShutterButtonControl extends IPSModuleStrict
     }
 
     /**
-     * Applies the configuration and registers the selected button variable.
+     * Applies the configuration after Symcon has reached KR_READY.
      */
     public function ApplyChanges(): void
     {
         parent::ApplyChanges();
 
-        $this->ResetPressState();
-        $this->UpdateButtonRegistration();
+        if (IPS_GetKernelRunlevel() !== KR_READY) {
+            $this->SetTimerInterval('LongPress', 0);
+            $this->UnregisterConfiguredButton();
+            $this->SetStatus(IS_INACTIVE);
+            return;
+        }
 
-        $this->SetStatus($this->DetermineConfigurationStatus());
+        $this->Initialize();
     }
 
     /**
-     * Removes message registrations and stops the timer before deletion.
+     * Stops active movement and removes registrations before deletion.
      */
     public function Destroy(): void
     {
         $this->SetTimerInterval('LongPress', 0);
+
+        if (IPS_GetKernelRunlevel() === KR_READY) {
+            $this->StopActiveMovement();
+        } else {
+            $this->WriteAttributeInteger('ActiveMoveID', 0);
+        }
+
+        $this->ResetPressState(false);
         $this->UnregisterConfiguredButton();
+        $this->ClearReferences();
+        $this->UnregisterMessage(0, IPS_KERNELSTARTED);
 
         parent::Destroy();
     }
 
     /**
-     * Handles updates from the configured button variable.
+     * Handles kernel and button messages.
      *
      * @param int          $TimeStamp Unix timestamp supplied by Symcon.
      * @param int          $SenderID  Sender object ID.
@@ -77,7 +96,13 @@ class OpenShutterButtonControl extends IPSModuleStrict
      */
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
-        if ($Message !== VM_UPDATE || $SenderID !== $this->ReadPropertyInteger('ButtonID')) {
+        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
+            $this->Initialize();
+            return;
+        }
+
+        $registeredButtonID = $this->ReadAttributeInteger('RegisteredButtonID');
+        if ($Message !== VM_UPDATE || $SenderID <= 0 || $SenderID !== $registeredButtonID) {
             return;
         }
 
@@ -97,11 +122,31 @@ class OpenShutterButtonControl extends IPSModuleStrict
     }
 
     /**
+     * Initializes references, message registration and module status.
+     */
+    private function Initialize(): void
+    {
+        if (IPS_GetKernelRunlevel() !== KR_READY) {
+            return;
+        }
+
+        $this->ResetPressState(true);
+        $this->UpdateReferences();
+
+        $status = $this->DetermineConfigurationStatus();
+        $this->UpdateButtonRegistration($status === IS_ACTIVE);
+        $this->SetStatus($status);
+    }
+
+    /**
      * Evaluates the current button value and handles press/release transitions.
      */
     private function HandleButton(): void
     {
-        if ($this->DetermineConfigurationStatus() !== IS_ACTIVE) {
+        $status = $this->DetermineConfigurationStatus();
+        if ($status !== IS_ACTIVE) {
+            $this->ResetPressState(true);
+            $this->SetStatus($status);
             return;
         }
 
@@ -155,12 +200,13 @@ class OpenShutterButtonControl extends IPSModuleStrict
 
         $pressStart = $this->ReadAttributeFloat('PressStart');
         $duration = max(0, (int) round((microtime(true) - $pressStart) * 1000));
+        $this->WriteAttributeFloat('PressStart', 0.0);
         $this->SetValue('last_duration_ms', $duration);
 
         if ($this->ReadAttributeBoolean('LongPressActive')) {
             $this->WriteAttributeBoolean('LongPressActive', false);
             $this->SetValue('last_action', 'long_press');
-            $this->StopShutter();
+            $this->StopActiveMovement();
             return;
         }
 
@@ -170,12 +216,14 @@ class OpenShutterButtonControl extends IPSModuleStrict
             return;
         }
 
-        // The timer should normally have fired already. This fallback keeps the
-        // long-press behavior deterministic if timer execution was delayed.
+        // The timer should normally have fired already. Temporarily restore the
+        // pressed state so a delayed timer still results in OPEN/CLOSE and STOP.
+        $this->WriteAttributeBoolean('ButtonPressed', true);
         $this->HandleLongPress();
+        $this->WriteAttributeBoolean('ButtonPressed', false);
         $this->WriteAttributeBoolean('LongPressActive', false);
         $this->SetValue('last_action', 'long_press');
-        $this->StopShutter();
+        $this->StopActiveMovement();
     }
 
     /**
@@ -186,6 +234,13 @@ class OpenShutterButtonControl extends IPSModuleStrict
         $this->SetTimerInterval('LongPress', 0);
 
         if (!$this->ReadAttributeBoolean('ButtonPressed') || $this->ReadAttributeBoolean('LongPressActive')) {
+            return;
+        }
+
+        $status = $this->DetermineConfigurationStatus();
+        if ($status !== IS_ACTIVE) {
+            $this->ResetPressState(true);
+            $this->SetStatus($status);
             return;
         }
 
@@ -206,9 +261,13 @@ class OpenShutterButtonControl extends IPSModuleStrict
         $openPosition = $positionMode === self::POSITION_MODE_HUNDRED_OPEN ? 100 : 0;
         $closedPosition = $positionMode === self::POSITION_MODE_HUNDRED_OPEN ? 0 : 100;
         $targetPosition = $direction === self::DIRECTION_UP ? $openPosition : $closedPosition;
+        $positionVariable = IPS_GetVariable($positionID);
+        $targetValue = $positionVariable['VariableType'] === VARIABLETYPE_FLOAT
+            ? (float) $targetPosition
+            : $targetPosition;
 
         $this->SendDebug('Shutter', 'Set position to ' . $targetPosition, 0);
-        RequestAction($positionID, $targetPosition);
+        RequestAction($positionID, $targetValue);
     }
 
     /**
@@ -216,20 +275,39 @@ class OpenShutterButtonControl extends IPSModuleStrict
      */
     private function MoveShutter(): void
     {
+        $moveID = $this->ReadPropertyInteger('MoveID');
         $direction = $this->ReadPropertyInteger('Direction');
         $command = $direction === self::DIRECTION_UP ? 'OPEN' : 'CLOSE';
 
+        $this->WriteAttributeInteger('ActiveMoveID', $moveID);
         $this->SendDebug('Shutter', 'Move command: ' . $command, 0);
-        RequestAction($this->ReadPropertyInteger('MoveID'), $command);
+
+        if (!RequestAction($moveID, $command)) {
+            $this->WriteAttributeInteger('ActiveMoveID', 0);
+            $this->WriteAttributeBoolean('LongPressActive', false);
+        }
     }
 
     /**
-     * Stops continuous shutter movement.
+     * Stops the movement on the exact variable that started it.
      */
-    private function StopShutter(): void
+    private function StopActiveMovement(): void
     {
+        $moveID = $this->ReadAttributeInteger('ActiveMoveID');
+        if ($moveID <= 0) {
+            return;
+        }
+
+        // Clear first so repeated cleanup calls never send duplicate STOP commands.
+        $this->WriteAttributeInteger('ActiveMoveID', 0);
+
+        if (!IPS_VariableExists($moveID) || !HasAction($moveID)) {
+            $this->SendDebug('Shutter', 'Unable to send STOP: movement variable or action is missing.', 0);
+            return;
+        }
+
         $this->SendDebug('Shutter', 'Move command: STOP', 0);
-        RequestAction($this->ReadPropertyInteger('MoveID'), 'STOP');
+        RequestAction($moveID, 'STOP');
     }
 
     /**
@@ -298,11 +376,11 @@ class OpenShutterButtonControl extends IPSModuleStrict
     /**
      * Replaces the previous button-message registration with the current one.
      */
-    private function UpdateButtonRegistration(): void
+    private function UpdateButtonRegistration(bool $configurationValid): void
     {
         $this->UnregisterConfiguredButton();
 
-        if ($this->DetermineConfigurationStatus() !== IS_ACTIVE) {
+        if (!$configurationValid) {
             return;
         }
 
@@ -325,18 +403,85 @@ class OpenShutterButtonControl extends IPSModuleStrict
     }
 
     /**
-     * Resets timer and transition state without triggering a shutter command.
+     * Synchronizes Symcon object references with the configured variables.
      */
-    private function ResetPressState(): void
+    private function UpdateReferences(): void
+    {
+        $configuredReferences = array_values(array_unique([
+            $this->ReadPropertyInteger('ButtonID'),
+            $this->ReadPropertyInteger('MoveID'),
+            $this->ReadPropertyInteger('PositionID')
+        ]));
+        $configuredReferences = array_values(array_filter(
+            $configuredReferences,
+            static fn (int $objectID): bool => $objectID > 0 && IPS_VariableExists($objectID)
+        ));
+
+        $registeredReferences = $this->ReadRegisteredReferences();
+
+        foreach (array_diff($registeredReferences, $configuredReferences) as $objectID) {
+            $this->UnregisterReference($objectID);
+        }
+
+        foreach (array_diff($configuredReferences, $registeredReferences) as $objectID) {
+            $this->RegisterReference($objectID);
+        }
+
+        sort($configuredReferences);
+        $this->WriteAttributeString(
+            'RegisteredReferences',
+            json_encode($configuredReferences, JSON_THROW_ON_ERROR)
+        );
+    }
+
+    /**
+     * Removes all object references previously registered by the module.
+     */
+    private function ClearReferences(): void
+    {
+        foreach ($this->ReadRegisteredReferences() as $objectID) {
+            $this->UnregisterReference($objectID);
+        }
+
+        $this->WriteAttributeString('RegisteredReferences', '[]');
+    }
+
+    /**
+     * Returns the persisted list of registered object references.
+     *
+     * @return list<int>
+     */
+    private function ReadRegisteredReferences(): array
+    {
+        $references = json_decode($this->ReadAttributeString('RegisteredReferences'), true);
+        if (!is_array($references)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $references,
+            static fn (mixed $objectID): bool => is_int($objectID) && $objectID > 0
+        ));
+    }
+
+    /**
+     * Resets timer and transition state and optionally stops active movement.
+     */
+    private function ResetPressState(bool $stopMovement): void
     {
         $this->SetTimerInterval('LongPress', 0);
+
+        if ($stopMovement) {
+            $this->StopActiveMovement();
+        }
+
         $this->WriteAttributeFloat('PressStart', 0.0);
         $this->WriteAttributeBoolean('ButtonPressed', false);
         $this->WriteAttributeBoolean('LongPressActive', false);
     }
 
     /**
-     * Validates all configured variables and returns the matching module status.
+     * Validates all properties and configured variables.
      */
     private function DetermineConfigurationStatus(): int
     {
@@ -345,7 +490,24 @@ class OpenShutterButtonControl extends IPSModuleStrict
         $positionID = $this->ReadPropertyInteger('PositionID');
 
         if ($buttonID <= 0 || $moveID <= 0 || $positionID <= 0) {
-            return IS_INACTIVE;
+            return 209;
+        }
+
+        $shortPressTime = $this->ReadPropertyInteger('ShortPressTime');
+        if ($shortPressTime < self::MIN_PRESS_TIME || $shortPressTime > self::MAX_PRESS_TIME) {
+            return 206;
+        }
+
+        if (!in_array($this->ReadPropertyInteger('Direction'), [self::DIRECTION_UP, self::DIRECTION_DOWN], true)) {
+            return 207;
+        }
+
+        if (!in_array(
+            $this->ReadPropertyInteger('PositionMode'),
+            [self::POSITION_MODE_ZERO_OPEN, self::POSITION_MODE_HUNDRED_OPEN],
+            true
+        )) {
+            return 208;
         }
 
         if (!$this->VariableHasType($buttonID, [VARIABLETYPE_BOOLEAN, VARIABLETYPE_INTEGER, VARIABLETYPE_FLOAT, VARIABLETYPE_STRING])) {
@@ -356,6 +518,12 @@ class OpenShutterButtonControl extends IPSModuleStrict
         }
         if (!$this->VariableHasType($positionID, [VARIABLETYPE_INTEGER, VARIABLETYPE_FLOAT])) {
             return 203;
+        }
+        if (!HasAction($moveID)) {
+            return 204;
+        }
+        if (!HasAction($positionID)) {
+            return 205;
         }
 
         return IS_ACTIVE;

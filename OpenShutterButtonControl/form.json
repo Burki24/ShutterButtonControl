@@ -12,7 +12,13 @@
                 {
                     "type": "SelectVariable",
                     "name": "ButtonID",
-                    "caption": "Button variable"
+                    "caption": "Button variable",
+                    "validVariableTypes": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ]
                 },
                 {
                     "type": "Label",
@@ -28,12 +34,21 @@
                 {
                     "type": "SelectVariable",
                     "name": "MoveID",
-                    "caption": "Movement variable (OPEN/CLOSE/STOP)"
+                    "caption": "Movement variable (OPEN/CLOSE/STOP)",
+                    "validVariableTypes": [
+                        3
+                    ],
+                    "requiredAction": 1
                 },
                 {
                     "type": "SelectVariable",
                     "name": "PositionID",
-                    "caption": "Position variable (0-100)"
+                    "caption": "Position variable (0-100)",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ],
+                    "requiredAction": 1
                 },
                 {
                     "type": "Select",
@@ -105,6 +120,36 @@
             "code": 203,
             "icon": "error",
             "caption": "The position variable must be numeric."
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "The movement variable has no executable action."
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "The position variable has no executable action."
+        },
+        {
+            "code": 206,
+            "icon": "error",
+            "caption": "The long-press threshold must be between 100 and 5000 milliseconds."
+        },
+        {
+            "code": 207,
+            "icon": "error",
+            "caption": "The configured direction is invalid."
+        },
+        {
+            "code": 208,
+            "icon": "error",
+            "caption": "The configured position logic is invalid."
+        },
+        {
+            "code": 209,
+            "icon": "inactive",
+            "caption": "The configuration is incomplete."
         }
     ]
 }

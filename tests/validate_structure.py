@@ -79,7 +79,9 @@ require(module.get("url") == REPOSITORY_URL, "module.json uses the wrong reposit
 
 form = load_json(MODULE / "form.json")
 require(isinstance(form.get("elements"), list) and bool(form["elements"]), "form.json must contain elements.")
-require(isinstance(form.get("status"), list) and len(form["status"]) == 3, "form.json must define three error states.")
+require(isinstance(form.get("status"), list), "form.json must define status entries.")
+status_codes = [entry.get("code") for entry in form["status"] if isinstance(entry, dict)]
+require(status_codes == list(range(201, 210)), "form.json must define review-hardening states 201 through 209.")
 
 locale = load_json(MODULE / "locale.json")
 translations = locale.get("translations")
@@ -118,8 +120,13 @@ for marker in [
     "RegisterStatusVariables();",
     "RegisterVariableInteger(",
     "RegisterVariableString(",
-    "UpdateButtonRegistration();",
+    "UpdateButtonRegistration(",
     "UnregisterConfiguredButton();",
+    "IPS_GetKernelRunlevel()",
+    "IPS_KERNELSTARTED",
+    "RegisterReference(",
+    "HasAction(",
+    "ActiveMoveID",
     "DetermineConfigurationStatus(): int",
     "MapButtonState(mixed $value): ?bool",
 ]:

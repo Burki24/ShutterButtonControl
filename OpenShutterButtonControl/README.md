@@ -8,6 +8,8 @@ Das Modul wertet eine Tastervariable aus und steuert abhängig von der Druckdaue
 - **Langer Tastendruck:** Die Bewegung wird über `OPEN` oder `CLOSE` gestartet. Beim Loslassen sendet das Modul `STOP`.
 - Die letzte erkannte Aktion und Druckdauer werden als Statusvariablen angezeigt.
 - Die Anbindung ist herstellerunabhängig, sofern die verwendeten Variablen die dokumentierten Werte und Aktionen bereitstellen.
+- Eine laufende Langfahrt wird bei Loslassen, Änderung der Instanzkonfiguration oder Löschen der Instanz mit `STOP` beendet.
+- Die Initialisierung der Fremdvariablen erfolgt erst, wenn der Symcon-Kernel vollständig betriebsbereit ist.
 
 ## 2. Voraussetzungen
 
@@ -35,7 +37,9 @@ Unter **Instanz hinzufügen** das Modul **OpenShutterButtonControl** auswählen.
 | Positionsvariable | Erwartet einen Zielwert zwischen 0 und 100 |
 | Richtung | Bestimmt, ob dieser Taster öffnet oder schließt |
 | Positionslogik | Ordnet offen/geschlossen den Werten 0 und 100 zu |
-| Grenze langer Tastendruck | Zeit, ab der die kontinuierliche Bewegung startet |
+| Grenze langer Tastendruck | Zeit zwischen 100 und 5000 ms, ab der die kontinuierliche Bewegung startet |
+
+Das Konfigurationsformular lässt für Bewegungs- und Positionsvariable nur passende Variablentypen mit vorhandener Aktion zu. Die gleichen Voraussetzungen werden zusätzlich bei jeder Initialisierung im Modulcode geprüft. Alle drei ausgewählten Variablen werden als Symcon-Objektreferenzen registriert.
 
 ## 5. Statusvariablen und Darstellungen
 
@@ -48,7 +52,7 @@ Das Modul erstellt keine eigenen Variablenprofile. Beide permanent benötigten S
 
 ## 6. Visualisierung
 
-Die Statusvariablen können bei Bedarf in der Symcon-Visualisierung angezeigt werden. Die Rollladensteuerung selbst erfolgt über den angebundenen physischen oder virtuellen Taster.
+Die Statusvariablen können bei Bedarf in der Symcon-Visualisierung angezeigt werden. Die Rollladensteuerung selbst erfolgt über den angebundenen physischen oder virtuellen Taster. Bei einer unvollständigen oder ungültigen Konfiguration zeigt die Instanz einen konkreten Statushinweis für die betroffene Variable oder Eigenschaft an.
 
 ## 7. PHP-Befehlsreferenz
 
