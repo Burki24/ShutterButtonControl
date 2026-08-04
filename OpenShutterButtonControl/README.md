@@ -50,10 +50,28 @@ Das Konfigurationsformular lässt für Bewegungs- und Positionsvariable nur pass
 
 Das Modul erstellt keine eigenen Variablenprofile. Beide permanent benötigten Statusvariablen werden direkt in `Create()` registriert und verwenden native Symcon-Darstellungen aus dem zentralen `VariablePresentationHelper`.
 
-## 6. Visualisierung
+## 6. Statushinweise
+
+Die Instanz zeigt ihren aktuellen Zustand direkt in der Symcon-Konsole an. Bei einem Konfigurationsfehler wird die Tasterüberwachung nicht registriert beziehungsweise sicher beendet, bis wieder eine gültige Konfiguration vorliegt.
+
+| Status | Bedeutung | Empfohlene Prüfung |
+| --- | --- | --- |
+| `102` | Instanz ist aktiv und betriebsbereit | Keine Maßnahme erforderlich |
+| `104` | Initialisierung ist noch nicht möglich | Symcon-Kernel startet noch; nach `KR_READY` initialisiert sich das Modul automatisch |
+| `201` | Tastervariable fehlt oder hat einen nicht unterstützten Typ | Boolean-, Integer-, Float- oder Stringvariable auswählen |
+| `202` | Bewegungsvariable ist keine Stringvariable | Stringvariable für `OPEN`, `CLOSE` und `STOP` auswählen |
+| `203` | Positionsvariable ist nicht numerisch | Integer- oder Floatvariable mit dem Wertebereich 0 bis 100 auswählen |
+| `204` | Bewegungsvariable besitzt keine ausführbare Aktion | Standard- oder benutzerdefinierte Aktion der Bewegungsvariable prüfen |
+| `205` | Positionsvariable besitzt keine ausführbare Aktion | Standard- oder benutzerdefinierte Aktion der Positionsvariable prüfen |
+| `206` | Grenze für langen Tastendruck ist ungültig | Wert zwischen 100 und 5000 Millisekunden einstellen |
+| `207` | Konfigurierte Richtung ist ungültig | „Rollladen öffnen“ oder „Rollladen schließen“ auswählen |
+| `208` | Konfigurierte Positionslogik ist ungültig | Eine der beiden angebotenen Zuordnungen für 0 und 100 auswählen |
+| `209` | Konfiguration ist unvollständig | Taster-, Bewegungs- und Positionsvariable vollständig auswählen |
+
+## 7. Visualisierung
 
 Die Statusvariablen können bei Bedarf in der Symcon-Visualisierung angezeigt werden. Die Rollladensteuerung selbst erfolgt über den angebundenen physischen oder virtuellen Taster. Bei einer unvollständigen oder ungültigen Konfiguration zeigt die Instanz einen konkreten Statushinweis für die betroffene Variable oder Eigenschaft an.
 
-## 7. PHP-Befehlsreferenz
+## 8. PHP-Befehlsreferenz
 
 Das Modul besitzt keine zusätzliche öffentliche PHP-API. Die Verarbeitung erfolgt automatisch über die konfigurierte Tastervariable.

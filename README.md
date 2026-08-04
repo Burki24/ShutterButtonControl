@@ -32,6 +32,24 @@ Verknüpft eine Tastervariable mit einer Bewegungs- und einer Positionsvariable 
 - Bewegungsvariable vom Typ String mit einer Aktion für `OPEN`, `CLOSE` und `STOP`
 - Numerische Positionsvariable mit einer Aktion für Werte von 0 bis 100
 
+## Statushinweise
+
+Die Instanz zeigt ihren aktuellen Zustand direkt in der Symcon-Konsole an. Bei einem Fehler bleibt die Tastersteuerung deaktiviert, bis die Ursache behoben ist.
+
+| Status | Bedeutung | Empfohlene Prüfung |
+| --- | --- | --- |
+| `102` | Instanz ist aktiv und betriebsbereit | Keine Maßnahme erforderlich |
+| `104` | Initialisierung ist noch nicht möglich | Symcon-Kernel startet noch; nach `KR_READY` initialisiert sich das Modul automatisch |
+| `201` | Tastervariable fehlt oder hat einen nicht unterstützten Typ | Boolean-, Integer-, Float- oder Stringvariable auswählen |
+| `202` | Bewegungsvariable ist keine Stringvariable | Stringvariable für `OPEN`, `CLOSE` und `STOP` auswählen |
+| `203` | Positionsvariable ist nicht numerisch | Integer- oder Floatvariable mit dem Wertebereich 0 bis 100 auswählen |
+| `204` | Bewegungsvariable besitzt keine ausführbare Aktion | Standard- oder benutzerdefinierte Aktion der Bewegungsvariable prüfen |
+| `205` | Positionsvariable besitzt keine ausführbare Aktion | Standard- oder benutzerdefinierte Aktion der Positionsvariable prüfen |
+| `206` | Grenze für langen Tastendruck ist ungültig | Wert zwischen 100 und 5000 Millisekunden einstellen |
+| `207` | Konfigurierte Richtung ist ungültig | „Rollladen öffnen“ oder „Rollladen schließen“ auswählen |
+| `208` | Konfigurierte Positionslogik ist ungültig | Eine der beiden angebotenen Zuordnungen für 0 und 100 auswählen |
+| `209` | Konfiguration ist unvollständig | Taster-, Bewegungs- und Positionsvariable vollständig auswählen |
+
 ## Installation
 
 Die Repository-URL im Symcon Module Control hinzufügen:
